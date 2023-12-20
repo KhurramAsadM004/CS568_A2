@@ -1,0 +1,1 @@
+{"layer_dim": [784, 50, 20, 10], "activations": [null, "relu", "relu", "softmax"], "optimizer": "sgd", "epochs": 1000, "loss": "mce", "batch_size": 64, "learning_rate": 0.01, "mode": "train", "weights_save_dir": "Weights/"}
