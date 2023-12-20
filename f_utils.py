@@ -96,7 +96,7 @@ def softmax(a):
     max_a = np.max(a) #compute maximum of pre-activations in a (1 max per sample if using mini-batches)
     a_exp = np.exp(a - max_a) #exponentials of pre-activations after subtracting maximum
     a_sum = sum(a_exp) #sum of exponentials
-    z = np.divide(a_exp, a_sum) #softmax results
+    z = np.divide(a_exp, a_sum) #softmax results [max(i,eps) for i in a_sum]
     return z
 
 
@@ -107,6 +107,8 @@ def mse(self, y, batch_target):
 def mce(self, y, batch_target):
     # print("Y:", y.shape)
     # print("T: ", batch_target.shape)
+    eps = 1e-9
+
     loss = 0
     m = 0
     n = 0
@@ -114,7 +116,8 @@ def mce(self, y, batch_target):
         n = 0
         y_loss = 0
         for j in i:
-            y_loss += batch_target[m][n] * np.log(j)
+            log_value = np.log(max(j, eps))
+            y_loss += batch_target[m][n] * log_value
             n += 1 
         loss += y_loss
         m += 1

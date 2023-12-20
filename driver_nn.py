@@ -11,7 +11,7 @@ parser.add_argument('--optimizer', dest='optimizer', default='sgd', choices=['sg
 parser.add_argument('--epochs', dest='epochs', type=int, default=1000, help='epochs')
 parser.add_argument('--loss', dest='loss', default='mce', choices=['mce'], help='loss functions')
 parser.add_argument('--batch_size', dest='batch_size', type=int, default=64, help='batch_size: 48, 64, 128,..')
-parser.add_argument('--check_grad', dest='check_grad', action='store_true', default=True, help='check gradient ..')
+parser.add_argument('--check_grad', dest='check_grad', action='store_true', default=False, help='check gradient ..')
 parser.add_argument('--early_stopping', dest='early_stopping', action='store_true', default=False, help='Enable early stopping. If set True, training will stop when validation loss stops improving for a certain number of epochs.')
 parser.add_argument('--learning_rate', dest='learning_rate', type=float, default=1e-2, help='learning_rate')
 parser.add_argument('--patience', dest='patience', type=int, default=10, help='Number of epochs with no improvement after which training will be stopped.')

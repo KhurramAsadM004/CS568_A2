@@ -46,13 +46,14 @@ def check_gradients(self, train_X, train_t):
             for n in range(0, self.num_neurons[l-1]):   
                 
                 # Retrieve the analytical gradient of weight n of neuron m in layer l
-                Analytical_grad = self.grads['dW%s' % l][m][n]
+                Analytical_grad = self.grads['dW%s' % l][m][n] 
+                Analytical_grad *= self.mini_batch_size
                 
                 # Calculate the numerical gradient of weight n of neuron m in layer l
                 Numerical_grad =  cal_numerical_gradient(self, l, m, n, train_X, train_t, eps)
                 
                 # Calculate the difference between the numerical and analytical gradients
-                # print(Numerical_grad, Analytical_grad)
+                # print(Numerical_grad, Analytical_grad)# * self.mini_batch_size)
                 diff = np.abs(Numerical_grad - Analytical_grad)
                 abs_diff[m,n] = diff
                 

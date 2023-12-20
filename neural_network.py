@@ -254,13 +254,13 @@ class NeuralNetwork():
                 minibatch_target =  train_t[:, idx:idx + self.mini_batch_size]
                 # print(minibatch_input.shape, minibatch_target)
                 # exit()
-                self.grad_ok = 1
-                # if self.grad_ok == 0:
-                #     # Check gradients
-                #     self.grad_ok = check_gradients(self, minibatch_input, minibatch_target)
-                #     if self.grad_ok  == 0:
-                #         print("Gradients are not ok! There is no point in training the network.\n")
-                #         return self.grad_ok
+                # self.grad_ok = 1
+                if self.grad_ok == 0:
+                    # Check gradients
+                    self.grad_ok = check_gradients(self, minibatch_input, minibatch_target)
+                    if self.grad_ok  == 0:
+                        print("Gradients are not ok! There is no point in training the network.\n")
+                        return self.grad_ok
                    
                 if self.grad_ok == 1:                   
                     # For current mini-batch, perform fprop and bprop and then update the parameters 
