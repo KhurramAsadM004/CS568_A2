@@ -116,7 +116,7 @@ def mce(self, y, batch_target):
         n = 0
         y_loss = 0
         for j in i:
-            log_value = np.log(max(j, eps))
+            log_value = np.log(j + eps)
             y_loss += batch_target[m][n] * log_value
             n += 1 
         loss += y_loss

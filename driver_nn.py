@@ -37,6 +37,17 @@ elif args.mode == 'test':
     print("training acc..", np.round(train_acc,2))
     print("testing acc..", np.round(test_acc,2))
     print("confusion_matrix: \n", confusion_matrix)
+
+    plt.title(f'Confusion matrix | Training acc. {np.round(train_acc,2)} | Testing acc. {np.round(test_acc, 2)}') # Set the title of the plot 
+    classes = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']
+    sb.heatmap(confusion_matrix, annot=True, fmt='d', cmap='Blues', xticklabels=classes, yticklabels=classes)
+    plt.ylabel('Actual')
+    plt.xlabel('Predicted')
+    plt.draw()
+    plt.pause(0.01)
+    plt.savefig('ConfusionMatrixTest.png')  
+    plt.clf()
+
 else:
     print("Please select a valid option: 'train' or 'test'.")
 

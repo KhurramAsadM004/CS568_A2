@@ -238,7 +238,7 @@ class NeuralNetwork():
         num_samples = train_t.shape[1]
         
         ## set values for early stopping 
-        best_val_loss = 100
+        best_val_loss = 500
         count = 0     
         
         # Start training epochs
