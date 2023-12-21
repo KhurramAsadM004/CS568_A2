@@ -381,23 +381,18 @@ class NeuralNetwork():
             if mode == 'test':
                 # Plot confusion matrix for test data (HINT: see train() function)
                 # '''ADD CODE HERE'''
-                # plt.subplots_adjust(hspace=0.5)
-                plt.subplot(2,1,2)   
-                # print("Here: ", confusion_matrix)         
-                # train_acc, confusion_matrix = self.test(train_x, train_t, 'train')  
-                # val_acc, _ = self.test(val_x, val_t, 'train')  
-                # plt.title(f'Confusion matrix | Train acc. {np.round(train_acc,2)} | Val acc. {np.round(val_acc,2)}') # Set the title of the plot 
+                fig = plt.gcf()  
                 classes = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']
                 sb.heatmap(confusion_matrix, annot=True, fmt='d', cmap='Blues', xticklabels=classes, yticklabels=classes)
                 plt.ylabel('Actual')
                 plt.xlabel('Predicted')
                 plt.draw()
                 plt.pause(0.01)
-                plt.clf()
 
                 
                 # Save it in "ConfusionMatrixTest.png"
-                '''ADD CODE HERE'''
+                fig.savefig('ConfusionMatrixTest.png')  
+                plt.clf()
             
             # Return the calculated accuracy and the confusion matrix
             return accuracy, confusion_matrix.astype(int) 
