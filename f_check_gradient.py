@@ -34,7 +34,7 @@ def check_gradients(self, train_X, train_t):
     """
     Check the gradients computed thourgh backpropagation against numerical gradient for each weight in the network
     """
-    eps= 1e-6
+    eps= 1e-7
     grad_ok = 0
     self.fprop(train_X) # Perform forward propagation 
     self.bprop(train_t) # Perform backward propagation to compute gradients
@@ -47,13 +47,13 @@ def check_gradients(self, train_X, train_t):
                 
                 # Retrieve the analytical gradient of weight n of neuron m in layer l
                 Analytical_grad = self.grads['dW%s' % l][m][n] 
-                Analytical_grad *= self.mini_batch_size
+                # Analytical_grad /= self.mini_batch_size
                 
                 # Calculate the numerical gradient of weight n of neuron m in layer l
                 Numerical_grad =  cal_numerical_gradient(self, l, m, n, train_X, train_t, eps)
                 
                 # Calculate the difference between the numerical and analytical gradients
-                # print(Numerical_grad, Analytical_grad)# * self.mini_batch_size)
+                print(Numerical_grad, Analytical_grad)# * self.mini_batch_size)
                 diff = np.abs(Numerical_grad - Analytical_grad)
                 abs_diff[m,n] = diff
                 

@@ -122,7 +122,8 @@ def mce(self, y, batch_target):
         loss += y_loss
         m += 1
     loss = -loss #mean multiclass cross-entropy loss for multiclass classification
-    return loss
+    # print(len(batch_target[0]))
+    return loss / len(batch_target[0])
 
 def bce(self, y, batch_target):
     eps = 1e-9

@@ -281,7 +281,7 @@ class NeuralNetwork():
             
             #Compute validation loss after current epoch
             self.fprop(val_x)
-            val_loss = self.calculate_loss(val_t) / val_t[0].shape
+            val_loss = self.calculate_loss(val_t) 
             val_loss_l.append(val_loss) 
             
            
