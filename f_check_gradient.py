@@ -53,7 +53,7 @@ def check_gradients(self, train_X, train_t):
                 Numerical_grad =  cal_numerical_gradient(self, l, m, n, train_X, train_t, eps)
                 
                 # Calculate the difference between the numerical and analytical gradients
-                print(Numerical_grad, Analytical_grad)# * self.mini_batch_size)
+                # print(Numerical_grad, Analytical_grad)# * self.mini_batch_size)
                 diff = np.abs(Numerical_grad - Analytical_grad)
                 abs_diff[m,n] = diff
                 

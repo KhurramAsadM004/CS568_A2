@@ -93,10 +93,10 @@ def identity_derivative(z):
 
 
 def softmax(a):
-    max_a = np.max(a) #compute maximum of pre-activations in a (1 max per sample if using mini-batches)
+    max_a = np.amax(a, axis=0) #compute maximum of pre-activations in a (1 max per sample if using mini-batches)
     a_exp = np.exp(a - max_a) #exponentials of pre-activations after subtracting maximum
-    a_sum = sum(a_exp) #sum of exponentials
-    z = np.divide(a_exp, a_sum) #softmax results [max(i,eps) for i in a_sum]
+    a_sum = np.sum(a_exp, axis=0) + 1e-9 #sum of exponentials
+    z = np.divide(a_exp, a_sum) #softmax results 
     return z
 
 
@@ -104,26 +104,17 @@ def mse(self, y, batch_target):
     loss = np.sum(np.square(y - batch_target)) / len(y) #mean squared loss for regression
     return loss
 
-def mce(self, y, batch_target):
-    # print("Y:", y.shape)
-    # print("T: ", batch_target.shape)
-    eps = 1e-9
+def mce(self, y, t):
+    eps, loss = 1e-9, 0
+    y, t = y.T, t.T
+    N, K = y.shape[0], y.shape[1]
 
-    loss = 0
-    m = 0
-    n = 0
-    for i in y:
-        n = 0
-        y_loss = 0
-        for j in i:
-            log_value = np.log(j + eps)
-            y_loss += batch_target[m][n] * log_value
-            n += 1 
-        loss += y_loss
-        m += 1
-    loss = -loss #mean multiclass cross-entropy loss for multiclass classification
-    # print(len(batch_target[0]))
-    return loss / len(batch_target[0])
+    for n in range(N):
+        for k in range(K):
+            loss += t[n][k] * np.log(y[n][k] + eps)
+
+    loss = -(loss/N) #mean multiclass cross-entropy loss for multiclass classification
+    return loss
 
 def bce(self, y, batch_target):
     eps = 1e-9
@@ -171,7 +162,6 @@ def load_model_details(self):
         self.mini_batch_size = model_details['batch_size']
         self.learning_rate = model_details['learning_rate']
         self.mode = model_details['mode']
-        # '''ADD CODE HERE''' # similarly for other details (HINT: see save_model_details() function above)
         self.weights_save_dir = model_details['weights_save_dir']
         print(model_details)
         

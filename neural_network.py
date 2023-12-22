@@ -155,6 +155,8 @@ class NeuralNetwork():
     
     def bprop(self, batch_target):
         batch_size = batch_target[0].shape
+        # if(self.loss == "mce"):
+        #     batch_size = 1
         
         # Retrieve output of the last layer of the neural network
         y = self.net['z%s' % str(self.num_layers)]    
@@ -169,15 +171,11 @@ class NeuralNetwork():
         # If using MSE loss, do not forget to take mean over the mini-batch
         # Size of dW should be the same as size of the weight matrix W of the output layer
         dW = np.dot(delta_k, z.T)/batch_size
-        if self.loss == "mse":
-            dW = dW / batch_size
         
         # Compute gradients of biases via delta_k x 1
         # If using MSE loss, do not forget to take mean over the mini-batch
         # Size of db should be the same as the size of the bias vector b of the output layer
         db = np.sum(delta_k, axis=1, keepdims=True)/batch_size
-        if self.loss == "mse":
-            db = db / batch_size
         
         # Store gradients for the output layer in self.grads dictionary
         self.grads['dW%s' % str(self.num_layers)] = dW 
@@ -205,16 +203,11 @@ class NeuralNetwork():
             # If using MSE loss, do not forget to take mean over the mini-batch
             # Size of dW should be the same as size of the weight matrix W of layer l
             dW =  np.dot(delta_j, z.T)/batch_size
-            if self.loss == "mse":
-                dW = dW / batch_size
-
             
             # Compute gradients of biases via delta_j x 1
             # If using MSE loss, do not forget to take mean over the mini-batch
             # Size of db should be the same as size of the bias vector b of layer l
             db =  np.sum(delta_j, axis=1, keepdims=True)/batch_size
-            if self.loss == "mse":
-                db = db / batch_size
             
             # Store gradients for current layer in self.grads dictionary
             self.grads['dW%s' % l] = dW
@@ -252,9 +245,7 @@ class NeuralNetwork():
                 minibatch_input =  train_x[:, idx:idx + self.mini_batch_size]
                 # Get mini-batch target
                 minibatch_target =  train_t[:, idx:idx + self.mini_batch_size]
-                # print(minibatch_input.shape, minibatch_target)
-                # exit()
-                # self.grad_ok = 1
+
                 if self.grad_ok == 0:
                     # Check gradients
                     self.grad_ok = check_gradients(self, minibatch_input, minibatch_target)
