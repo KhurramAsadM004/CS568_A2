@@ -107,7 +107,7 @@ def mse(self, y, batch_target):
 def mce(self, y, t):
     eps, loss = 1e-9, 0
     y, t = y.T, t.T
-    N, K = y.shape[0], y.shape[1]
+    N, K = y.shape
 
     for n in range(N):
         for k in range(K):
@@ -116,16 +116,12 @@ def mce(self, y, t):
     loss = -(loss/N) #mean multiclass cross-entropy loss for multiclass classification
     return loss
 
-def bce(self, y, batch_target):
-    eps = 1e-9
-    
-    y_pred = np.clip(y, eps, 1 - eps)
-    y_actual = batch_target
+def bce(self, y, t):
 
-    first_part = y_actual * np.log(y_pred + eps)    
-    second_part = (1-y_actual) * np.log(1-y_pred + eps)
+    eps = 1e-9    
+    y = y + eps
     
-    loss = -np.mean(first_part+second_part, axis=0) #mean binary cross-entropy loss for binary classification
+    loss = -np.mean(t * np.log(y) + (1-t) * np.log(1-y), axis=0) #mean binary cross-entropy loss for binary classification
     
     return loss
 

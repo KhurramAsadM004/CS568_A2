@@ -156,7 +156,6 @@ class NeuralNetwork():
     def bprop(self, batch_target):
         batch_size = batch_target[0].shape
         # if(self.loss == "mce"):
-        #     batch_size = 1
         
         # Retrieve output of the last layer of the neural network
         y = self.net['z%s' % str(self.num_layers)]    
