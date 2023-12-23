@@ -166,7 +166,6 @@ class NeuralNetwork():
                 # Update the biases of the current layer
                 self.parameters['b%s' % l] -= self.learning_rate*self.grads['db'+str(l)]
         if self.optimizer == "adam":
-            # print("calculating adam:")
             for l in range(1, self.num_layers+1): # Iterate over each layer
                 #get dw and db
                 dw = self.grads['dW'+str(l)]
