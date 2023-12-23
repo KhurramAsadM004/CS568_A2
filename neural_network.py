@@ -168,38 +168,37 @@ class NeuralNetwork():
         if self.optimizer == "adam":
             # print("calculating adam:")
             for l in range(1, self.num_layers+1): # Iterate over each layer
+                #get dw and db
                 dw = self.grads['dW'+str(l)]
                 db = self.grads['db'+str(l)]
+
+                #get m(for both W and b) and v(for both W and b)
                 mW = self.adam_parameters['mW%s' % l]
                 mb = self.adam_parameters['mb%s' % l]
                 vW = self.adam_parameters['vW%s' % l]
                 vb = self.adam_parameters['vb%s' % l]
 
+                #compute new m values at time T using values at time T - 1
                 mW = self.delta*mW + (1-self.delta)*dw 
                 mb = self.delta*mb + (1-self.delta)*db
 
+                #compute new v values at time T using values at time T - 1
+                #notice that we took square of the derivate as we are only interested
+                #in the magnitude of the grads
                 vW = self.gamma*vW + (1-self.gamma)*(dw**2)
                 vb = self.gamma*vb + (1-self.gamma)*(db**2)
 
-                # if(tao > 335):
-                #     exit()
-                # if(l == 1):
-                #     print(tao, ": (",  self.delta**tao, self.gamma**tao, "), (", 1 - self.delta**tao, 1-self.gamma**tao,")" )
-                # if(tao > 330 and l == 1): 
-                #     print("vW: ", vb)
-
+                #calculate correction terms
                 _mW = mW/(1-self.delta**tao)
                 _mb = mb/(1-self.delta**tao)
                 _vW = vW/(1-self.gamma**tao)
                 _vb = vb/(1-self.gamma**tao) 
 
-                # print("at layer ", l , ": ", self.hyper_parameters['mW%s' % l].shape)
-                # print(mW.shape, mb.shape, vb.shape, dw.shape, vb)
-                # if(l == 3):
-                #     exit()
-
+                #update weight using adam
                 self.parameters['W%s' % l] -= self.learning_rate*(_mW/(np.sqrt(_vW)+self.eps_for_v))
                 self.parameters['b%s' % l] -= self.learning_rate*(_mb/(np.sqrt(_vb)+self.eps_for_v))
+
+                #store the updated momentum and v values
                 self.adam_parameters['mW%s' % l] = mW
                 self.adam_parameters['mb%s' % l] = mb
                 self.adam_parameters['vW%s' % l] = vW
