@@ -31,7 +31,15 @@ class NeuralNetwork():
         self.loss = args.loss
         self.early_stopping = args.early_stopping        
         self.patience = args.patience
-        
+        # self.mhat_dw = 0
+        # self.mhat_db = 0
+        # self.vhat_dw = 0
+        # self.vhat_db = 0
+        self.delta = args.delta
+        self.gamma = args.gamma
+        self.eps_for_v = args.eps_for_v
+
+
         self.weights_save_dir = args.weights_save_dir        
         self.mode = args.mode
 
@@ -44,6 +52,7 @@ class NeuralNetwork():
         and so on
         '''
         self.parameters = dict()
+        self.adam_parameters = dict()
         
         '''
         self.net is a dictionary that will store the outputs of every neuron
@@ -99,7 +108,13 @@ class NeuralNetwork():
              
              # Initialize biases to zero
              self.parameters['b%s' % l] = np.zeros((self.num_neurons[l], 1))
-             
+
+             self.adam_parameters['mW%s' % l] = np.zeros_like(self.parameters['W%s' % l])
+             self.adam_parameters['mb%s' % l] = np.zeros_like(self.parameters['b%s' % l])
+
+             self.adam_parameters['vW%s' % l] = np.zeros_like(self.parameters['W%s' % l])
+             self.adam_parameters['vb%s' % l] = np.zeros_like(self.parameters['b%s' % l])
+
              print(f"Sizes of weights and biases initialized at layer {l}:",self.parameters['W%s'%l].shape,self.parameters['b%s'%l].shape)
 
     
@@ -142,20 +157,56 @@ class NeuralNetwork():
             loss = bce(self, y, batch_target) 
         return loss
     
-    def update_parameters(self):    
+    def update_parameters(self, tao):    
         if self.optimizer == 'sgd':                    
             for l in range(1, self.num_layers+1): # Iterate over each layer
                 # Update the weights of the current layer
                 self.parameters['W%s' % l] -= self.learning_rate*self.grads['dW'+str(l)]
-
                 
                 # Update the biases of the current layer
                 self.parameters['b%s' % l] -= self.learning_rate*self.grads['db'+str(l)]
-           
-    
+        if self.optimizer == "adam":
+            # print("calculating adam:")
+            for l in range(1, self.num_layers+1): # Iterate over each layer
+                dw = self.grads['dW'+str(l)]
+                db = self.grads['db'+str(l)]
+                mW = self.adam_parameters['mW%s' % l]
+                mb = self.adam_parameters['mb%s' % l]
+                vW = self.adam_parameters['vW%s' % l]
+                vb = self.adam_parameters['vb%s' % l]
+
+                mW = self.delta*mW + (1-self.delta)*dw 
+                mb = self.delta*mb + (1-self.delta)*db
+
+                vW = self.gamma*vW + (1-self.gamma)*(dw**2)
+                vb = self.gamma*vb + (1-self.gamma)*(db**2)
+
+                # if(tao > 335):
+                #     exit()
+                # if(l == 1):
+                #     print(tao, ": (",  self.delta**tao, self.gamma**tao, "), (", 1 - self.delta**tao, 1-self.gamma**tao,")" )
+                # if(tao > 330 and l == 1): 
+                #     print("vW: ", vb)
+
+                _mW = mW/(1-self.delta**tao)
+                _mb = mb/(1-self.delta**tao)
+                _vW = vW/(1-self.gamma**tao)
+                _vb = vb/(1-self.gamma**tao) 
+
+                # print("at layer ", l , ": ", self.hyper_parameters['mW%s' % l].shape)
+                # print(mW.shape, mb.shape, vb.shape, dw.shape, vb)
+                # if(l == 3):
+                #     exit()
+
+                self.parameters['W%s' % l] -= self.learning_rate*(_mW/(np.sqrt(_vW)+self.eps_for_v))
+                self.parameters['b%s' % l] -= self.learning_rate*(_mb/(np.sqrt(_vb)+self.eps_for_v))
+                self.adam_parameters['mW%s' % l] = mW
+                self.adam_parameters['mb%s' % l] = mb
+                self.adam_parameters['vW%s' % l] = vW
+                self.adam_parameters['vb%s' % l] = vb
+
     def bprop(self, batch_target):
         batch_size = batch_target[0].shape
-        # if(self.loss == "mce"):
         
         # Retrieve output of the last layer of the neural network
         y = self.net['z%s' % str(self.num_layers)]    
@@ -170,6 +221,8 @@ class NeuralNetwork():
         # If using MSE loss, do not forget to take mean over the mini-batch
         # Size of dW should be the same as size of the weight matrix W of the output layer
         dW = np.dot(delta_k, z.T)/batch_size
+        # print(delta_k.shape, z.shape, dW.shape)
+        # exit()
         
         # Compute gradients of biases via delta_k x 1
         # If using MSE loss, do not forget to take mean over the mini-batch
@@ -212,9 +265,7 @@ class NeuralNetwork():
             self.grads['dW%s' % l] = dW
             self.grads['db%s' % l] = db
             self.grads['delta%s' % l] = delta_j
-       
-           
-
+                  
 
     def train(self, train_x, train_t, val_x, val_t):      
         # Initialize model parameters    
@@ -230,8 +281,9 @@ class NeuralNetwork():
         num_samples = train_t.shape[1]
         
         ## set values for early stopping 
-        best_val_loss = 500
+        best_val_loss = 100
         count = 0     
+        tao = 1
         
         # Start training epochs
         print("Training started....")
@@ -258,7 +310,8 @@ class NeuralNetwork():
                     loss = self.calculate_loss(minibatch_target)
                     train_loss_b.append(loss)
                     self.bprop(minibatch_target)           
-                    self.update_parameters()
+                    self.update_parameters(tao)
+                    tao += 1
                     
               
             '''
@@ -362,15 +415,12 @@ class NeuralNetwork():
 
             
             # Calculate the accuracy 
-            # print("Confusion matrix: ", confusion_matrix)
             number_of_correct_predictions = np.trace(confusion_matrix) #HINT: Diagonal of confusion matrix
             total_predictions = confusion_matrix.sum(axis=1).sum()
-            # print(number_of_correct_predictions, total_predictions)
             accuracy = (number_of_correct_predictions/total_predictions)*100
             
             if mode == 'test':
                 # Plot confusion matrix for test data (HINT: see train() function)
-                # '''ADD CODE HERE'''
                 fig = plt.gcf()  
                 classes = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']
                 sb.heatmap(confusion_matrix, annot=True, fmt='d', cmap='Blues', xticklabels=classes, yticklabels=classes)
